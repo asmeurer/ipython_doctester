@@ -9,12 +9,12 @@ decorators off, set ipython_doctester.run_tests = False.
 Note: It's easy to cheat by simply deleting or changing the doctest.  That's
 OK, cheating is learning, too.
 
-If you want to track students' progress through a notebook in a 
-classroom setting, you can; see 
+If you want to track students' progress through a notebook in a
+classroom setting, you can; see
 http://ipython-docent.appspot.com/
 for instructions.
-  
-Developed for the Dayton Python Workshop: 
+
+Developed for the Dayton Python Workshop:
 https://openhatch.org/wiki/Dayton_Python_Workshop
 catherine.devlin@gmail.com
 
@@ -28,7 +28,6 @@ import requests
 import IPython.zmq.displayhook
 
 __version__ = '0.2.2'
-finder = doctest.DocTestFinder()
 docent_url = 'http://ipython-docent.appspot.com'
 
 """Set these per session, as desired."""
@@ -37,7 +36,7 @@ verbose = False    # ``True`` causes the result table to print,
                    # even for successes
 
 """Set these if desired to track student progress
-at http://ipython-docent.appspot.com/.  
+at http://ipython-docent.appspot.com/.
 See that page for more instructions."""
 student_name = None
 workshop_name = None
@@ -58,7 +57,7 @@ class Reporter(object):
       """
     success_template = """
       <p style="color:green;font-size:250%;font-weight=bold">Success!</p>
-      """    
+      """
     def trap_txt(self, txt):
         self.txt += txt
     def publish(self):
@@ -69,8 +68,8 @@ class Reporter(object):
     def _repr_html_(self):
         result = self.fail_template if self.failed else self.success_template
         if verbose or self.failed:
-            examples = '\n        '.join(self.example_template % 
-                                 (cgi.escape(e.source), cgi.escape(e.want), 
+            examples = '\n        '.join(self.example_template %
+                                 (cgi.escape(e.source), cgi.escape(e.want),
                                   e.color, cgi.escape(e.got)
                                   )for e in self.examples)
             result += """
@@ -80,7 +79,7 @@ class Reporter(object):
         """
         return result
 
-        
+
 reporter = Reporter()
 
 
@@ -103,7 +102,7 @@ class Runner(doctest.DocTestRunner):
         example.want = self._or_nothing(example.want)
         example.color = 'green'
         reporter.examples.append(example)
-        return doctest.DocTestRunner.report_success(self, out, test, example, got)    
+        return doctest.DocTestRunner.report_success(self, out, test, example, got)
     def report_unexpected_exception(self, out, test, example, exc_info):
         reporter.failed = True
         trim = len(reporter.txt)
@@ -114,38 +113,38 @@ class Runner(doctest.DocTestRunner):
         example.color = 'red'
         reporter.examples.append(example)
         return result
-         
-        
+
+
 runner = Runner()
 finder = doctest.DocTestFinder()
 
-class IPythonDoctesterException(StandardError):    
+class IPythonDoctesterException(StandardError):
     def _repr_html_(self):
         return '<pre>\n%s\n</pre>' % self.txt
-    
+
 class NoTestsException(IPythonDoctesterException):
     txt = """
-    OOPS!  We expected to find a doctest - 
+    OOPS!  We expected to find a doctest -
     a string immediately after the function definition, looking something like
         def do_something():
             '''
             >>> do_something()
             'did something'
-            ''' 
+            '''
     ... but it wasn't there.  Did you insert code between the function definition
-    and the doctest?   
+    and the doctest?
     """
-   
+
 class NoStudentNameException(IPythonDoctesterException):
     txt = """
-    OOPS!  We need you to set the ipython_doctester.student_name variable; 
+    OOPS!  We need you to set the ipython_doctester.student_name variable;
     please look for it (probably in the first cell in this worksheet) and
     enter your name, like
         ipython_doctester.student_name = 'Catherine'
     ... then hit Shift+Enter to execute that cell, then come back here to
     execute this one.
     """
-    
+
 def testobj(func):
     tests = finder.find(func)
     if not tests:
@@ -161,13 +160,13 @@ def testobj(func):
         runner.run(t, out=reporter.trap_txt)
     reporter.publish()
     if workshop_name:
-        payload = dict(function_name = func.__name__, 
-                       failure=reporter.failed, 
+        payload = dict(function_name = func.__name__,
+                       failure=reporter.failed,
                        source=inspect.getsource(func),
                        workshop_name = workshop_name,
                        student_name = student_name)
         requests.post(docent_url+'/record', data=payload)
-            
+
     return reporter
 
 def report_error(e):
