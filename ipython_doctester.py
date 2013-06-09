@@ -24,7 +24,12 @@ import doctest
 import cgi
 import inspect
 import sys
-import requests
+
+try:
+    import requests
+except ImportError:
+    requests = None
+
 import IPython.zmq.displayhook
 
 __version__ = '0.2.2'
@@ -160,6 +165,8 @@ def testobj(func):
         runner.run(t, out=reporter.trap_txt)
     reporter.publish()
     if workshop_name:
+        if not requests:
+            raise ImportError("The requests module is required to upload results.")
         payload = dict(function_name = func.__name__,
                        failure=reporter.failed,
                        source=inspect.getsource(func),
