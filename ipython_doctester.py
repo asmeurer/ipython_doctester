@@ -156,7 +156,7 @@ def testobj(func):
         raise NoTestsException
     if workshop_name and not student_name:
         raise NoStudentNameException()
-    globs = {}  # TODO: get the ipython globals?
+    globs = func.__globals__
     reporter.__init__()
     globs[func.__name__] = func
     globs['reporter'] = reporter
